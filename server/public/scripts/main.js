@@ -1,5 +1,4 @@
 function Send(form) {
-    console.log(432);
     addMessage(myself, form.value, true);
     // setTimeout(function(){addMessage(conan, "Hello,world,again!", false);}, 1000);
 }
@@ -49,13 +48,30 @@ function addMessage(user, message, isend) {
 
     var scrollElement = document.getElementsByClassName("message-test");
 
-    messageCBox.scrollTop += 100;
+    messageCBox.scrollTop += 9999;
 }
 
+var socket = io();
+
+socket.on('message',function(msg){
+    console.log(msg);
+    addMessage(myself,msg,true);
+});
+
+function send() {
+    var userInput = document.getElementsByClassName('inputText')[0];
+    console.log(userInput);
+    socket.emit('message',userInput.value);
+    userInput.value = "";
+};
+
+// function sendMessage() {
+//     socket.on()
+// }
 
 function formatZero(num, length) {
     return (Array(length).join(0) + num).slice(-length);
-}
+};
 
 var myself = {
     name: "Naruto",
