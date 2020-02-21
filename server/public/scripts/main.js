@@ -55,12 +55,16 @@ var socket = io();
 
 socket.on('message',function(msg){
     console.log(msg);
-    addMessage(myself,msg,true);
+    addMessage(myself,msg,false);
 });
 
 function send() {
     var userInput = document.getElementsByClassName('inputText')[0];
-    console.log(userInput);
+    if (userInput.value == "") {
+        alert("消息不能为空！");
+        return ;
+    }
+    addMessage(myself,userInput.value,true);
     socket.emit('message',userInput.value);
     userInput.value = "";
 };
