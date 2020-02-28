@@ -152,7 +152,7 @@ body {
     偏暗色 rgba(17, 17, 17,1.0) */
 
 /* 登录注册窗口 */
-.logWindow {
+.logRegWindow {
     position: fixed;
     top: 0;
     left: 0;

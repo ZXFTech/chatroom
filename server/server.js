@@ -15,13 +15,17 @@ var dbName = 'chatroom';
 // DataBase
 var db;
 
+// 各数据集合名称
+var userCollection = 'colUsers';
+var recordsCollection = 'colChatRecords';
+
 // Create a new mongoClient
 var client = new MongoClient(url,{useUnifiedTopology: true});
 
-// Use connect method to connect to the server
+//  连接mongoDB数据库服务
 client.connect(function(err) {
     assert.equal(null,err);
-    console.log("Connected successfully to server");
+    console.log("Connected successfully to mongodb server");
 
     db = client.db(dbName);
 });
@@ -34,30 +38,65 @@ app.get('/', function(req, res) {
 
 io.on('connection', function(socket) {
     console.log('connection');
-    // console.log('用户分配中...');
-    // var user = userList.pop();
-    // console.log('登录用户为:',user.name);
 
-    socket.on('message', function(user,msg) {
+    // var recentRecords = findDocuments();
+    var recentRecords;
+
+    socket.emit('sendRecentRecords',recentRecords);
+
+    // 收到消息
+    socket.on('message', function(messageChunk) {
         // console.log(socket.toString());
-        socket.broadcast.emit('message', user,msg);
-        console.log(msg);
+        socket.broadcast.emit('message', messageChunk);
+        insertDocument([messageChunk],recordsCollection,function(result) {
+            if (result.result.ok == 1) {
+                console.log('Message recorded.');
+            }
+        })
     });
 
+    // 注册
     socket.on('register',function(userStatus) {
         var user = new User(userStatus);
-        insertDocument([user],'testCollection',function(result) {
-            console.log(result.result.ok);
-            if (result.result.ok==1) {
-                console.log(user.username);
-                socket.emit('regSuccessfully',user);
+        findDocuments({'username':user.username},'testCollection',function(result){
+            if (result.length) {
+                socket.emit('regFailed','该用户名已存在.');
             }
             else {
-                socket.emit('regFailed');
+                insertDocument([user],'testCollection',function(result) {
+                    console.log(result.result.ok);
+                    if (result.result.ok==1) {
+                        console.log(user.username);
+                        socket.emit('logOrRegSuccessfully',user);
+                    }
+                    else {
+                        socket.emit('regFailed','出现问题，请稍后再试。');
+                    }
+                });
+                console.log(user);
+            }
+        })
+    });
+
+    // 登录
+    socket.on('login',function(userStatus) {
+        console.log('someone try to login');
+        var loginUser = new User(userStatus);
+        var user; findDocuments({'username':loginUser.username},'testCollection',function(result) {
+            if (result.length) {
+                if (result[0].password === loginUser.password) {
+                    socket.emit('logOrRegSuccessfully',result[0]);
+                }
+                else {
+                    socket.emit('logFailed','密码不正确！');
+                }
+            }
+            else {
+                socket.emit('logFailed','用户名不存在！');
             }
         });
-        console.log(user);
-    });
+
+    })
 });
 
 // insert document
@@ -75,10 +114,9 @@ function insertDocument(insertDocument,collectionName,callback) {
 // 查找
 function findDocuments(filter,collectionName,callback) {
     var collection = db.collection(collectionName);
-
-    collection.find(filter).toArray(function(err,items) {
-        assert.equal(null,err);
-        assert.equal(4,items.length);
+    collection.find(filter).toArray(function(err,docs){
+        assert.equal(err,null);
+        callback(docs);
     });
 }
 
@@ -128,30 +166,8 @@ http.listen(8888, function() {
 });
 
 function User(userStatus) {
-    this.username=userStatus.userName;
+    this.username=userStatus.username;
     this.password=userStatus.password;
     this.icon='/images/usericons/akari.jpg';
     this.level=1;
-}
-
-var userList = [{
-    name: "Conan",
-    level: 2,
-    icon: "./images/usericons/conan.jpg"
-}, {
-    name: "Naruto",
-    level: 1,
-    icon: "./images/usericons/naruto.jpg"
-}];
-
-var myself = {
-    name: "Naruto",
-    level: 1,
-    icon: "./images/usericons/naruto.jpg"
-}
-
-var conan = {
-    name: "Conan",
-    level: 2,
-    icon: "./images/usericons/conan.jpg"
 }

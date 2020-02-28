@@ -30,13 +30,13 @@
         <div class="logRegTip">还没注册？快<a onclick="openLogRegWindow()" href="#">登录/注册</a>加入聊天吧！</div>
     </div>
     <!-- 注册界面 -->
-    <div class="logWindow hidden">
+    <div class="logRegWindow">
         <div class="logOrRegister">
-            <input type="button" class="logTag" value="登   陆" />
+            <input type="button" class="logTag" value="登   陆" onclick="tryLogReg('login')"/>
             <div class="logRegister">
                 <form action="">
-                    <input type="text" id ="userName" class="logRegInput" value="" autocomplete="off" onkeyup="checkUsername()" placeholder="请输入您的用户名">
-                    <p id="userNameError" class="logRegError"></p>
+                    <input type="text" id ="username" class="logRegInput" value="" autocomplete="off" onkeyup="checkUsername()" placeholder="请输入您的用户名">
+                    <p id="usernameError" class="logRegError"></p>
                     <input type="password" id="password" class="logRegInput" value="" autocomplete="off" onchange="checkPassword()" placeholder="请输入您的密码">
                     <p id="passwordError" class="logRegError" ></p>
                     <!-- <input type="button" class="logRegisterButton" value="登录" onclick="userLog"> -->
@@ -49,7 +49,7 @@
                     <input type="button" class="logRegisterButton" value="注册" onclick="userRegister">
                 </form> -->
             </div>
-            <input type="button" class="regTag" value="注   册" onclick="tryRegister()">
+            <input type="button" class="regTag" value="注   册" onclick="tryLogReg('register')">
         </div>
     </div>
 

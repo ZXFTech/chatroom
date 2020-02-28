@@ -7,7 +7,7 @@ function Send(form) {
     // setTimeout(function(){addMessage(conan, "Hello,world,again!", false);}, 1000);
 }
 
-function addMessage(user, message, isend) {
+function addMessage(messageChunk, isend) {
     var messageCBox = document.getElementsByClassName("messageCBox")[0];
     var newDivMessageTest = document.createElement("div");
     var addclass = isend ? "message-test isend" : "message-test";
@@ -16,8 +16,7 @@ function addMessage(user, message, isend) {
 
     var newUserIcon = document.createElement("img");
     newUserIcon.setAttribute("class", "user-icon");
-    console.log(user.icon);
-    newUserIcon.setAttribute("src", user.icon);
+    newUserIcon.setAttribute("src", messageChunk.user.icon);
     newUserIcon.setAttribute("alt", "usericon");
     newDivMessageTest.appendChild(newUserIcon);
 
@@ -26,25 +25,25 @@ function addMessage(user, message, isend) {
 
     var newUserLevel = document.createElement("div");
     newUserLevel.setAttribute("class", "user-level");
-    var level = document.createTextNode("LV." + user.level);
+    var level = document.createTextNode("LV." + messageChunk.user.level);
     newUserLevel.appendChild(level);
     newUserMessage.appendChild(newUserLevel);
 
     var newUserName = document.createElement("div");
     newUserName.setAttribute("class", "user-name");
-    var newName = document.createTextNode(user.username);
+    var newName = document.createTextNode(messageChunk.user.username);
     newUserName.appendChild(newName);
     newUserMessage.appendChild(newUserName);
 
     var newUserChattime = document.createElement("div");
     newUserChattime.setAttribute("class", "user-chattime");
-    var newChattime = document.createTextNode(formatZero(new Date().getHours(), 2) + ":" + formatZero(new Date().getMinutes(), 2) + ":" + formatZero(new Date().getSeconds(), 2));
+    var newChattime = document.createTextNode(messageChunk.time);
     newUserChattime.appendChild(newChattime);
     newUserMessage.appendChild(newUserChattime);
 
     var newUserContent = document.createElement("div");
     newUserContent.setAttribute("class", "user-content");
-    var userContent = document.createTextNode(message);
+    var userContent = document.createTextNode(messageChunk.content);
     newUserContent.appendChild(userContent);
     newUserMessage.appendChild(newUserContent);
 
@@ -90,28 +89,20 @@ function checkPassword() {
 
 }
 
-function tryLog() {
-    var userName = document.getElementById("uerName").value();
-    var password = document.getElementById("password").value();
-
-
-}
-
-function tryRegister() {
-    var userName = document.getElementById("userName").value;
+function tryLogReg(logOrReg) {
+    var username = document.getElementById("username").value;
     var password = document.getElementById("password").value;
-    socket.emit('register',{
-        'userName':userName,
+    socket.emit(logOrReg,{
+        'username':username,
         'password':password
     });
-        document.getElementsByClassName('logWindow')[0].classList.add('hidden');
 }
 
 function openLogRegWindow() {
     document.getElementsByClassName('logWindow')[0].classList.remove('hidden');
-}
+};
 
-document.getElementsByClassName('logWindow')[0].addEventListener('click',function(e) {
+document.getElementsByClassName('logRegWindow')[0].addEventListener('click',function(e) {
     if (e.target.className=="logWindow") {
         e.target.classList.add('hidden');
     }
@@ -119,31 +110,51 @@ document.getElementsByClassName('logWindow')[0].addEventListener('click',functio
 
 var socket = io();
 
+socket.on('sendRecentRecords',function(recentRecords) {
+    if (recentRecords == null) {
+        console.log(recentRecords);
+        console.log('Got the records but there is nothing.');
+    }
+    else {
+        for (var record in recentRecords) {
+            addMessage(record,record.user.username == cUser.username);
+        }
+    }
+});
+
 socket.on('message', function(user,msg) {
     console.log(msg);
     addMessage(user, msg, false);
 });
 
-socket.on('regSuccessfully',function(user){
-    console.log("I'm in!");
-    console.log(user.name);
+socket.on('logOrRegSuccessfully',function(user){
     cUser = new User(user);
     document.getElementsByClassName('inputArea')[0].classList.remove('hidden');
     document.getElementsByClassName('logRegTip')[0].classList.add('hidden');
+    document.getElementsByClassName('logRegWindow')[0].classList.add('hidden');
 });
 
-// socket.on('regFailed',function(){
-//     console.log('Failed');
-// });
+socket.on('regFailed',function(errmsg){
+    document.getElementById('usernameError').innerHTML = errmsg;
+});
+
+socket.on('logFailed',function(errmsg) {
+    document.getElementById('usernameError').innerHTML = errmsg;
+})
 
 function send() {
     var userInput = document.getElementsByClassName('inputText')[0];
-    if (userInput.value == "") {
+    var content = userInput.value;
+    if (content == "") {
         alert("消息不能为空！");
         return;
     }
-    console.log(cUser);
-    addMessage(cUser, userInput.value, true);
-    socket.emit('message',cUser, userInput.value);
+    var messageChunk = {
+        user:cUser,
+        time:formatZero(new Date().getHours(), 2) + ":" + formatZero(new Date().getMinutes(), 2) + ":" + formatZero(new Date().getSeconds(), 2),
+        content:content
+    }
+    addMessage(messageChunk, true);
+    socket.emit('message',messageChunk);
     userInput.value = "";
 };
