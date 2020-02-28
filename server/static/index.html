@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>chatroom</title>
+    <link rel="stylesheet" href="./styles/main.css"/>
+</head>
+
+<body>
+    <div class="chatRoom">
+        <div class="messageCBox">
+            <div class="message-test isend">
+                <img class="user-icon" src="./images/userIcons/naruto.jpg" alt="usericon" />
+                <div class="user-message">
+                    <div class="user-level">LV.1</div>
+                    <div class="user-name">Naruto</div>
+                    <div class="user-chattime">20:11:00</div>
+                    <div class="user-content">
+                        Hello,world!
+                    </div>
+                </div>
+            </div>
+        </div>
+        <form class="inputArea hidden" name="inputArea" action="" method="POST">
+            <input class="inputText" type="text" name="userInput" value="">
+            <!-- <input class="inputSend" type="submit" name="send" value="发送"> -->
+            <input class="inputSend" type="button" name="sendbutton" value="发送" onclick="send()">
+        </form>
+        <div class="logRegTip">还没注册？快<a onclick="openLogRegWindow()" href="#">登录/注册</a>加入聊天吧！</div>
+    </div>
+    <!-- 注册界面 -->
+    <div class="logWindow hidden">
+        <div class="logOrRegister">
+            <input type="button" class="logTag" value="登   陆" />
+            <div class="logRegister">
+                <form action="">
+                    <input type="text" id ="userName" class="logRegInput" value="" autocomplete="off" onkeyup="checkUsername()" placeholder="请输入您的用户名">
+                    <p id="userNameError" class="logRegError"></p>
+                    <input type="password" id="password" class="logRegInput" value="" autocomplete="off" onchange="checkPassword()" placeholder="请输入您的密码">
+                    <p id="passwordError" class="logRegError" ></p>
+                    <!-- <input type="button" class="logRegisterButton" value="登录" onclick="userLog"> -->
+                </form>
+                <!-- <form action="" class="regform">
+                    <label for="">用户名</label>
+                    <input type="text" id="reg-username" class="logRegInput">
+                    <h3>密码</h3>
+                    <input type="text" id="reg-password" class="logRegInput">
+                    <input type="button" class="logRegisterButton" value="注册" onclick="userRegister">
+                </form> -->
+            </div>
+            <input type="button" class="regTag" value="注   册" onclick="tryRegister()">
+        </div>
+    </div>
+
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="./scripts/main.js"></script>
+    <script type="text/javascript" src="./scripts/classes.js"></script>
+</body>
+
+</html>
