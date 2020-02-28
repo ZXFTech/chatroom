@@ -110,14 +110,16 @@ document.getElementsByClassName('logRegWindow')[0].addEventListener('click',func
 
 var socket = io();
 
-socket.on('sendRecentRecords',function(recentRecords) {
+socket.on('recentRecords',function(recentRecords) {
     if (recentRecords == null) {
         console.log(recentRecords);
         console.log('Got the records but there is nothing.');
     }
     else {
-        for (var record in recentRecords) {
-            addMessage(record,record.user.username == cUser.username);
+        for (var i = recentRecords.length-1; i >0; i--) {
+            console.log(recentRecords[i].user);
+            addMessage(recentRecords[i],recentRecords[i].user.username == cUser.username);
+            console.log("Added");
         }
     }
 });

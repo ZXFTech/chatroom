@@ -39,11 +39,6 @@ app.get('/', function(req, res) {
 io.on('connection', function(socket) {
     console.log('connection');
 
-    // var recentRecords = findDocuments();
-    var recentRecords;
-
-    socket.emit('sendRecentRecords',recentRecords);
-
     // 收到消息
     socket.on('message', function(messageChunk) {
         // console.log(socket.toString());
@@ -72,6 +67,7 @@ io.on('connection', function(socket) {
                         console.log(result.result.ok);
                         if (result.result.ok==1) {
                             console.log(user.username);
+                            queryRecentRecords(socket);
                             socket.emit('logOrRegSuccessfully',user);
                         }
                         else {
@@ -96,6 +92,7 @@ io.on('connection', function(socket) {
                 }
                 if (result.length) {
                     if (result[0].password === loginUser.password) {
+                        queryRecentRecords(socket);
                         socket.emit('logOrRegSuccessfully',result[0]);
                     }
                     else {
@@ -110,6 +107,15 @@ io.on('connection', function(socket) {
 
     })
 });
+
+function queryRecentRecords(socket){
+    findDocuments({},recordsCollection,function(cursor) {
+            cursor.sort({"_id":-1}).limit(10).toArray(function(err,doc){
+                console.log(doc);
+            socket.emit('recentRecords',doc);
+        });
+    })
+}
 
 // insert document
 function insertDocument(insertDocument,collectionName,callback) {
